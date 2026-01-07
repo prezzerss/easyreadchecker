@@ -3,7 +3,6 @@ package com.digitalartefact.main;
 import java.util.Scanner;
 import com.digitalartefact.savedata.UserData;
 
-
 /*
  *  Handles the main menu for the Easy Read Checker.
  *  - Logs the user in by name and loads/saves their data.
@@ -21,7 +20,6 @@ public class MainMethod
 		Scanner scanner = new Scanner(System.in);
 		
 		System.out.println("Welcome to the Easy Read Checker user!\n");
-		
 		System.out.println("Please type your first name to enter the programme:\n");
 		
 		String userName = scanner.nextLine().trim();
@@ -64,13 +62,14 @@ public class MainMethod
 						+ "\n3. Check for any difficult words in sentence."
 						+ "\n4. Check for any written out numbers in sentence."
 						+ "\n5. View all past sentences."
-						+ "\n6. View one past sentence."
-						+ "\n7. Enter a new sentence."
-						+ "\n8. Quit programme. \n");
+						+ "\n6. View your overall average sentence length."
+						+ "\n7. View one past sentence."
+						+ "\n8. Enter a new sentence."
+						+ "\n9. Quit programme. \n");
 				
 				int option = 0;
 				
-				// Accepts only valid option choices: Choices 1 - 8.
+				// Accepts only valid option choices: 1-8.
 				while(true)
 				{
 					if(scanner.hasNextInt())
@@ -78,7 +77,7 @@ public class MainMethod
 						option = scanner.nextInt();
 						scanner.nextLine();
 						
-						if(option >= 1 && option <= 8)
+						if(option >= 1 && option <= 9)
 							break;
 					}
 					
@@ -100,10 +99,15 @@ public class MainMethod
 					break;
 				
 				case 5:
-					OptionsMenu.optionFive(currentUser);
+					OptionsMenu.runPastSentences(currentUser);
+					break;
+					
+				case 6:
+					OptionsMenu.runAverageSentenceLength(currentUser);
 					break;
 						
-				case 6: System.out.println("\nEnter number of past sentence:\n");
+				case 7: System.out.println("\nYou have chosen option 7.");
+						System.out.println("\nEnter number of past sentence:\n");
 						
 						int listSize = currentUser.getAllSentences().size();
 						int userSentencePick = -1;
@@ -154,12 +158,11 @@ public class MainMethod
 						
 						break;
 						
-				
-						
-				case 7: checkingSentence = false;
-						 break;
+				case 8: System.out.println("\nYou have chosen option 8.");
+						checkingSentence = false;
+						break;
 						 
-				case 8: checkingSentence = false;
+				case 9: checkingSentence = false;
 						runProgramme = false;
 						break;
 					
@@ -224,7 +227,8 @@ public class MainMethod
 				runCheckOption(choice, sentence);
 				break;
 					
-			case 5: choosing = false;
+			case 5: System.out.println("\nYou have chosen option 5.");
+					choosing = false;
 					break;
 				
 			default: System.out.println("\nInvalid choice. Try again.\n");

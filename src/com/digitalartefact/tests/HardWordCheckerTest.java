@@ -11,16 +11,35 @@ public class HardWordCheckerTest
     {
         System.out.println("Testing HardWordChecker\n");
 
-        // Expect "accessible" and "addiction" warnings. 
-        System.out.println("Test 1 (sentence with hard words):");
-        HardWordChecker.checkForHardWords("The service must be accessible to people suffering with addiction.");
+        // Expect warnings for: Accessible, Addiction.
+        System.out.println("Test 1 (simple hard words):");
+        HardWordChecker.checkForHardWords("The service must be accessible to people struggling with addiction.");
 
-        // Expect "No hard words detected!"
-        System.out.println("\nTest 2 (sentence with no hard words):");
+        // Expect all hard words detected.
+        System.out.println("\nTest 2 (all hard words in one sentence):");
+        HardWordChecker.checkForHardWords(
+            "Accessible abuse addiction anxiety assessment benefits campaign consent " +
+            "discrimination equality homeless mental health poverty safeguarding wellbeing."
+        );
+
+        // Expect detection with punctuation and mixed case.
+        System.out.println("\nTest 3 (mixed case + punctuation):");
+        HardWordChecker.checkForHardWords(
+            "ACCESSIBLE, Abuse! aDdIcTiOn? Anxiety; Assessment: Benefits. " +
+            "Campaign, consent... Discrimination? Equality! Homeless, Mental Health; " +
+            "Poverty! Safeguarding. Wellbeing?"
+        );
+
+        // Expect detection of multi-word hard word "mental health".
+        System.out.println("\nTest 4 (multi-word hard word):");
+        HardWordChecker.checkForHardWords("Good mental health is important for wellbeing.");
+
+        // Expect no hard words detected.
+        System.out.println("\nTest 5 (no hard words):");
         HardWordChecker.checkForHardWords("This is a simple sentence with easy words.");
-        
-        // Expect "No hard words detected!".
-        System.out.println("\nTest 3 (null and empty input):");
+
+        // Expect null + empty input safety handling.
+        System.out.println("\nTest 6 (null and empty input):");
         HardWordChecker.checkForHardWords(null);
         HardWordChecker.checkForHardWords("");
 

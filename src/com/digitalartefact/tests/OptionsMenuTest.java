@@ -31,15 +31,19 @@ public class OptionsMenuTest
         // Expect warning for "nine".
         System.out.println("\nRunning option 4 (number check):");
         OptionsMenu.runCheckOption(4, sentence);
+
+        // Expect "1. This is a simple sentence with nine words maybe."
+        System.out.println("\nRunning option 5 (show past sentences):");
+        OptionsMenu.runPastSentences(testUser);
+        
+        // Expect average = 9.0
+        System.out.println("\nRunning option 6 (average word count):");
+        OptionsMenu.runAverageSentenceLength(testUser);
         
         // Expect invalid option warning.
         System.out.println("\nRunning option 10 (invalid option check)");
         OptionsMenu.runCheckOption(10, sentence);
 
-        // Expect "1. This is a simple sentence with nine words maybe."
-        System.out.println("Running option 5 (show past sentences):");
-        OptionsMenu.optionFive(testUser);
-
-        System.out.println("\nTest complete");
+        System.out.println("Test complete");
     }
 }

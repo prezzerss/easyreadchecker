@@ -75,7 +75,7 @@ public class OptionsMenu
                 default:
                     if(wordCount > 18)
                     {
-                    	System.out.println("This is a bad length. Suggest shortening.");
+                    	System.out.println("This is a bad length. Strongly suggest shortening.");
                     }
                     else
                     {
@@ -144,12 +144,12 @@ public class OptionsMenu
      * Array of available sentence checks for options 1–4.
      * Index 0 = option 1, index 1 = option 2, etc.
      */
-    private static final SentenceCheck[] CHECKS = 
+    private static final SentenceCheck[] checks = 
     {
     	new WordCountCheck(),
     	new WordLengthCheck(),
         new HardWordCheck(),
-        new DigitCheck()  
+        new DigitCheck()
     };
     
     /**
@@ -158,10 +158,11 @@ public class OptionsMenu
     public static void runCheckOption(int option, String sentence)
     {
     	int i = option - 1;
-    	if (i >= 0 && i < CHECKS.length)
+    	if (i >= 0 && i < checks.length)
     	{
-    		CHECKS[i].run(sentence);
-    		}
+    		checks[i].run(sentence);
+    	}
+    	
     	else
     	{
     		System.out.println("\nThat's an invalid option - please try again.\n");
@@ -169,108 +170,129 @@ public class OptionsMenu
     }
     
     /**
+     * Abstract class for viewing past sentences and an average check.
+     * Options:
+     *  - Print the description as a header.
+     *  - Perform their specific logic.
+     */
+    public static abstract class PastSentenceCheck
+	{
+		private String description;
+		
+		public PastSentenceCheck(String description)
+		{
+			this.description = description;
+		}
+		
+		/**
+         * Runs this option:
+         * - Prints a header using the description
+         * - Performs the specific logic.
+         */
+		public void run(UserData currentUser)
+		{
+			System.out.println("\n" + description);
+			performCheck(currentUser);
+		}
+		
+		/**
+         * Each option fills in this method with its own logic.
+         */
+		protected abstract void performCheck(UserData currentUser);
+	}
+
+    /**
      * Option 5:
      * Prints all the past sentences saved for the current user.
      */
-    public static void optionFive(UserData currentUser)
+    public static class PastSentences extends PastSentenceCheck
     {
-    	System.out.println("\nYour past sentences:");
-    	int i = 1;
-    	for (String s : currentUser.getAllSentences())
+    	public PastSentences()
     	{
-    		System.out.println(i + ". " + s);
-    		i++;	
+    		super("You have chosen option 5.\n\nYour past sentences:");
     	}
-    }   
-}
-
-
-	
-	/*
-	/*
-     * Option 1:
-     * Counts the words in the sentence and prints feedback on the sentence length.
-
-	public static void optionOne(String sentence)
-	{
-		System.out.println("\nYou have chosen option 1.");
-		System.out.println("Checking amount words in your sentence...");
-		
-		int wordCount = WordCounter.countWords(sentence);
-		
-		System.out.println("\nThere are " + wordCount + " words in your sentence.");
-		switch(wordCount)
-        {
-            case 3,4,5,6,7,8,9:
-        		System.out.println("This is an excellent length.");
-                break;
-            case 10,11,12,13:
-            	System.out.println("This is a good length.");
-                break;
-            case 14,15,16:
-            	System.out.println("This is a fair length. Could be shortened.");
-                break;
-            case 17,18:
-            	System.out.println("This is a poor length. Suggest shortening.");
-                break;
-            default:
-                if(wordCount > 18)
-                {
-                	System.out.println("This is a bad length. Suggest shortening.");
-                }
-                else
-                {
-                	System.out.println("This is an invalid length.");
-                }
-                break;
-        }
-	}
-	
-	/*
-     * Option 2:
-     * Checks each word length and prints warnings for words over the 12 character limit.
-     
-	public static void optionTwo(String sentence)
-	{
-		System.out.println("\nYou have chosen option 2.");
-		System.out.println("Checking word lengths in your sentence...");
-		WordLengthChecker.checkWordLength(sentence);
-	}
-	
-	/*
-     * Option 3:
-     * Checks for any hard words and prints suggested alternative words and definitions.
-     
-	public static void optionThree(String sentence)
-	{
-		System.out.println("\nYou have chosen option 3.");
-		System.out.println("Checking for any difficult words in your sentence...");
-		HardWordChecker.checkForHardWords(sentence);
-	}
-	
-	/*
-     * Option 4:
-     * Checks for written out numbers and suggests using digits instead.
-     
-	public static void optionFour(String sentence)
-	{
-		System.out.println("\nYou have chosen option 4.");
-		System.out.println("Checking for any written out numbers in your sentence...");
-		DigitsChecker.checkForNumbers(sentence);
-	}
-	
-	/*
-     * Option 5:
-     * Prints all the past sentences saved for the current user.
+    	
+    	@Override
+    	protected void performCheck(UserData currentUser)
+    	{
+        	int i = 1;
+        	for (String s : currentUser.getAllSentences())
+        	{
+        		System.out.println(i + ". " + s);
+        		i++;	
+        	}
+    	}
+    }
     
-	public static void optionFive(UserData currentUser)
-	{
-		System.out.println("\nYour past sentences:");
-		int i = 1;
-		for (String s : currentUser.getAllSentences())
-		{
-			System.out.println(i + ". " + s);
-			i++;
-		}
-	}
-	*/
+    /**
+     *  Option 6:
+     *  Prints the user's average sentence length based off all past saved sentences.
+     */
+    public static class AverageSentenceLength extends PastSentenceCheck
+    {
+    	public AverageSentenceLength()
+    	{
+    		super("You have chosen option 6.");
+    	}
+    	
+    	@Override
+    	protected void performCheck(UserData currentUser)
+    	{
+    		var sentences = currentUser.getAllSentences();
+        	if(sentences == null || sentences.isEmpty())
+        	{
+        		System.out.println("\nYou don't have any saved sentences yet!");
+        		return;
+        	}
+        	
+        	double average = AverageWordCounter.averageWords(sentences);
+        	System.out.println("\nYour average sentence length is " + average + " words.");
+        	
+        	// if-else ladder to re-use feedback from WordCountCheck.
+        	if(average >= 3 && average <= 9)
+        	{
+        		System.out.println("This is an excellent average sentence length.");
+        	}
+        	else if(average >= 10 && average <= 13)
+        	{
+        		System.out.println("This is a good average sentence length.");
+        	}
+        	else if(average >= 14 && average <= 16)
+        	{
+        		System.out.println("This is a fair average sentence length. Could be shortened.");
+        	}
+        	else if(average >= 17 && average <= 18)
+        	{
+        		System.out.println("This is a poor average sentence length. Suggest shortening.");
+        	}
+        	else if(average > 18)
+        	{
+        		System.out.println("This is a bad average sentence length. Strongly suggest shortening.");
+        	}
+        	else
+        	{
+        		System.out.println("This average is unusually low - check your saved sentences.");
+        	}
+    	}
+    }
+    
+    /**
+     * Helper method to run the PastSentences option
+     * Used in MainMethod (for option 5)
+     * @param currentUser
+     */
+    public static void runPastSentences(UserData currentUser)
+    {
+    	new PastSentences().run(currentUser);
+    }
+    
+    /**
+     * Helper method to run the AverageSentenceLength option
+     * Used in MainMethod (for option 6)
+     * @param currentUser
+     */
+    public static void runAverageSentenceLength(UserData currentUser)
+    {
+    	new AverageSentenceLength().run(currentUser);
+    }
+}
