@@ -1,155 +1,226 @@
-# Section 1: Description of Features
+# Development Log for my Easy Read Checker
 
-This section describes three key features implemented in my Easy Read Checker digital artefact. The features selected are **User Input and Console Output**, **Objects and Methods**, and **Testing**. Together, these features demonstrate my understanding of core Java programming concepts and how they have been applied to create a structured console-based application.
+## Introduction
 
----
+In this development log, I highlight 3 features and 3 issues I faced when coding my Easy Read Checker.
 
-## Feature 1: User Input and Console Output
+## Feature 1: [Selection]
 
-User input and console output are central to how the Easy Read Checker operates. The application runs entirely in the console and relies on clear prompts and readable feedback to guide the user through the program.
+In the *MainMethod* class, I used a *switch* statement to handle the nine different options available to the user. From a technical standpoint, a *switch* is often more readable and efficient than a long if-else ladder when dealing with a single variable (in this case, 
+*int option*).
+``` java
+switch(option) 
+{ 
+    case 1: 
+    case 2: 
+    case 3: 
+    case 4: 
+        runCheckOption(option, userInput);
+        break;
+    case 5: 
+        OptionsMenu.runPastSentences(currentUser); 
+        break;
+    // ...
+}
+```
 
-User input is handled using Java’s `Scanner` class. When the program starts, the user is prompted to enter their name and then a sentence to check for Easy Read suitability. This input is stored as strings and passed to the relevant checker methods.
+By stacking cases 1 - 4, I routed all primary checkers to a single method, *runCheckOption*, reducing any code redundancy. This demonstrates an understanding of how selection can be used for clearer and cleaner structure.
 
-Example code:
+The *AverageSentenceLength* class required a way to evaluate ranges. For this , I implemented an if-else ladder. This allowed the programme to categorise the double average into qualitative responses, like “excellent" or "good."
+``` java
+if(average >= 3 && average <= 9) 
+{ 
+    System.out.println("This is an excellent average sentence length."); 
+} 
+else if(average >= 10 && average <= 13) 
+{ 
+    System.out.println("This is a good average sentence length."); 
+}
+```
+This allowed me to evaluate conditions sequentially until one is found to be true. I specifically designed these ranges based on Easy Read accessibility standards, ensuring that the code doesn't just function, but serves the purpose of improving readability.
 
-    Scanner scanner = new Scanner(System.in);
+In the *MainMethod* class, I used a *while(true)* loop combined with an *if(scanner.hasNextInt())* check. This selection code was a good prevention plan to stop the programme from crashing if a user enters a string instead of a number.
 
-    System.out.println("Enter your name:");
-    String userName = scanner.nextLine();
+## Feature 2: [Abstract Class]
 
-    System.out.println("Enter a sentence to check:");
-    String sentence = scanner.nextLine();
-
-Console output is used throughout the program to provide feedback from each checker. Messages are displayed using `System.out.println()` and are written in a clear and simple way to match Easy Read principles. This feature demonstrates how console input and output streams work in Java and how they can be used to build an interactive program.
-
----
-
-## Feature 2: Objects and Methods (Object-Oriented Design)
-
-The Easy Read Checker is designed using an object-oriented approach. Instead of placing all logic in one class, the program is split into multiple classes, each responsible for a specific task. This makes the code easier to read, maintain, and extend.
-
-Examples of classes include:
-
-- `WordCounter` – counts the number of words in a sentence  
-- `WordLengthChecker` – identifies words that are too long  
-- `HardWordChecker` – detects difficult words and suggests alternatives  
-- `DigitsChecker` – finds written-out numbers  
-
-Each class contains methods that perform a single, well-defined action. This follows good programming practice and reflects concepts taught in lectures about modular design and separation of concerns.
-
-Example method:
-
-    public static void checkWordLength(String sentence) {
-        String[] words = sentence.split("\\s+");
-
-        for (String word : words) {
-            if (word.length() > 12) {
-                System.out.println("Long word found: " + word);
-            }
-        }
+I created am abstract base class called *SentenceCheck*. An abstract class acts as a restricted class that cannot be used to create objects, but instead it exists to be inherited by other classes.
+``` java
+public static abstract class SentenceCheck
+{
+    private String description;
+    public SentenceCheck(String description)
+    {
+        this.description = description;
     }
-
-This method demonstrates the use of arrays, loops, selection statements, and methods. Organising the program this way allows each feature to be developed and tested independently.
-
----
-
-## Feature 3: Testing (Unit Testing with JUnit)
-
-Testing is used to ensure that key parts of the program work correctly. I implemented unit tests using JUnit to verify methods such as word counting and option handling.
-
-Each test checks that a method returns the expected result for a given input. This helps identify bugs early and confirms that changes to the code do not break existing functionality.
-
-Example test:
-
-    @Test
-    public void testWordCount() {
-        int result = WordCounter.countWords("This is a test sentence");
-        assertEquals(5, result);
+    public void run(String sentence) 
+    {
+        System.out.println("\n" + description);
+        perform Check(sentence);
     }
+    protected abstract void performCheck(String sentence);
+}
+```
 
-Writing unit tests encouraged better method design, particularly returning values instead of only printing output. Testing also supported iterative development and helped ensure the overall correctness of the program.
+The run method defines the steps of the algorithm (print header, then run check) but leaves the implementation of *performCheck* to the subclasses.
 
-# Section 2: Issues Encountered
+Each specific class like *WordCountCheck* or *HardWordCheck*, extends this base class. This is known as **inheritance**. By overriding the *protected abstract void performCheck* method, each subclass provides its own unique logic while reusing the header-printing code from the parent.
 
-During the development of the Easy Read Checker, I encountered several issues that required debugging, additional research, and changes to my original approach. This section discusses three key code-based issues, the learning process behind resolving them, and an evaluation of the solutions used.
+This design allowed me to use **polymorphism** to manage my classes. I stored all my checkers in a single array:
+``` java
+private static final SentenceCheck[] checks =
+{
+	new WordCountCheck(),
+	new WordLengthCheck(),
+	new HardWordCheck(),
+	new DigitCheck()
+};
+```
 
----
+When a user picks an option, it just calls *.run()* on the array element. This makes the code extendable – if I wanted to add something like a ‘grammar checker’ in the future, I just create one new class that extends *SentenceCheck*, and the rest of the code can stay unchanged.
 
-## Issue 1: Handling Empty or Invalid User Input
+Using abstract classes for both *SentenceCheck* and *PastSentenceCheck* massively improved the maintainability of my project.
 
-One of the first issues encountered was how the program handled empty or invalid user input. If the user pressed Enter without typing a sentence, some of the checker classes would still attempt to process the input, leading to confusing or incorrect output.
+## Feature 3: [Arrays + ArrayLists]
 
-Originally, the sentence was passed directly into the checker methods without validation:
+To build my programme, I needed a way to store large sets of data – stuff like a dictionary of hard words with their replacements and definitions, and lists of written out numbers. For this, I used both *Arrays* and *ArrayLists*.
 
-    String sentence = scanner.nextLine();
-    WordLengthChecker.checkWordLength(sentence);
+Unlike a usual *Array* that has a fixed size, an *ArrayList* can grow and shrink dynamically. This was essential for the *HardWordChecker* class, where I store a collection of *Term* objects.
+``` java
+private static final ArrayList<Term> hardWords = new ArrayList<Term>();
+private static void add(String hardWord, String definition, String simpler)
+{
+	hardWords.add(new Term(hardWord, definition, simpler));
+}
+```
 
-This caused problems because methods such as `split()` would still run on an empty string. To resolve this, I added validation at the start of each checker method to ensure the sentence was not null or empty.
+Using an *ArrayList<Term>* ensured that the list only contained *Term objects*. This allowed me to iterate through the list using an enhanced *for* loop to check the user’s sentence against every hard word in my dictionary.
 
-Final solution:
+The *DigitsChecker* class takes my data management further. I used multiple *ArrayLists* to build combinations of numbers (ones, tens, hundreds). By nesting loops to populate these lists, I created a vocabulary of written numbers up to 999.
+``` java
+for(int i = 0; i < hundredsList.size(); i++)
+{
+	for(int j = 1; j < onesList.size(); j++)
+	{
+        hundredsAndOnesList.add(hundredsList.get(i) + “ and “ + onesList.get(j));
+	}
+}
+```
+Using *ArrayLists* allowed my programme to be modular. Because the data is stored in a list rather than hard coded into *if* statements, the checker is extendable. I can expand the dictionary simply by adding more items to the list without changing the code.
 
-    if (sentence == null || sentence.isEmpty()) {
-        System.out.println("No sentence to check.");
-        return;
+## Issue 1: [File Overwriting]
+
+One of the main features I wanted in my project was persistence. I wanted to save the user’s sentence history between multiple runs. However, I ran into a bug during the early stages of my *UserData* class. Every time I saved a new sentence, the previous sentences were deleted from the text file. The file would only ever contain the single most recent entry.
+
+In my initial implementation, I treated the file writer as a simple dump for the current sentences. I didn’t realise that initialising a *FileWriter* without any specific arguments defaults to overwriting the existing text file.
+``` java
+public void addSentence(String sentence)
+{
+	try
+    {
+        FileWriter writer = new FileWriter(“users/data.txt”);
+		writer.write(sentence);
+		writer.close();
+	}
+	catch(IOException e)
+    {
+	    e.printStackTrace();
     }
+}
+```
 
-This approach follows defensive programming principles discussed in lectures, where input should always be validated before processing. While this does result in repeated checks across classes, it ensures that each checker is safe to run independently.
+To fix this, I had to research the *java.io* library and the *FileWriter* class constructors. I learned two key concepts:
+- Append Mode: *FileWriter* has a constructor *new FileWriter(file, true)* that adds to the end of the file rather than replacing it.
+- State Management: Simply appending wasn’t enough if I wanted to load and view old sentences within the programme. I realised I needed to hold the state of the user’s history in memory (using an *ArrayList*) and sync that entire list to the file.
 
----
+I decided to manage the data via an ArrayList. Instead of just appending to the data, my UserData class now loads the entire history into memory when the programme starts. When saving, it writes the complete list back to the text file. This ensures that the text file always matches the programme’s memory state.
+``` java
+public void saveToFile()
+{
+	File file = new File(“users/” + name.toLowerCase() + “.txt”);
+	try (FileWriter writer = new FileWriter(file, false))
+	{
+		for (String s : userSentences)
+		{
+			writer.write(s + “\n”);
+		}
+	}
+	catch (IOException exception)
+	{
+		exception.printStackTrace();
+	}
+}
+```
 
-## Issue 2: Hard Word Checker Logic Conflicts
+While I could have just used Append Mode to add singular lines, writing the whole list was more robust. It prevents “duplicate line” bugs if the save function is called multiple times, and would allow me to implement features like deleting sentences if I wanted. This is because the file is always a reflection of the ArrayList.
 
-The Hard Word Checker was one of the most complex features to implement. Initially, it attempted to handle multiple responsibilities at once, including detecting hard words, suggesting simpler alternatives, and printing definitions. This led to logic conflicts and inconsistent output.
+## Issue 2: [False Positive]
 
-A key issue was that hard words were being added to the list multiple times, causing duplicate results. This happened because the list was populated every time the method ran.
+During testing of the HardWordChecker, I noticed a confusing bug. When I was using my test class for the checker, a simple sentence (with no hard words) like “This is a simple sentence with easy words.”, the programme would still print the header: “Suggested easier sentence:” followed by the exact same sentence entered. 
 
-Original behaviour (simplified):
+While the code wasn’t crashing, it was providing incorrect feedback. It implied the user needed to change something when they didn’t, which wasn’t the purpose of my programme.
 
-    hardWords.add(new Term("consider", "think about"));
+The issue stemmed from the flow of my checkForHardWords method. I was building the suggestion string and then immediately printing it, assuming that if the method ran there must have been changes. I failed to check if any replacements occurred within my code.
+``` java
+String suggestion = buildSuggestion(sentence, definitionsOut);
+System.out.println(“Suggested easier sentence:”);
+System.out.println(suggestion);
+```
 
-This resulted in repeated suggestions across multiple runs. After reviewing Java collections and debugging the issue, I changed the logic so that hard words are only added once.
+I realised that I needed to compare the state of the sentence before and after the check. I learned that I couldn’t just use == (which compares memory locations), but instead needed to use the .equals() method to compare the actual content of the strings. I also realised I needed to use booleans to control the flow of the console output, ensuring that specific blocks of code ran when specific conditions were met.
 
-Final solution:
+I introduced booleans to track the status of the checker. I created a variable sentenceChanged that returns true only if the suggestion is not equal to the original sentence. I then used an if statement controlled by this boolean.
+``` java
+ArrayList<String> definitionsOut = new ArrayList<String>();
+String suggestion = buildSuggestion(sentence, definitionsOut);
+boolean sentenceChanged = !suggestion.equals(sentence);
+// ...
+if(sentencedChanged)
+{
+	System.out.println(“Suggested easier sentence:”);
+	System.out.println(suggestion);
+}
+```
 
-    if (hardWords.isEmpty()) {
-        addHardWords();
+This helped to hide the incorrect feedback when a sentence was fine, and only interrupted a user when the feedback was correct. 
+
+## Issue 3: [Punctuation Problem]
+
+When testing my WordLengthChecker, I discovered a flaw in how I was calculating word lengths. If a user wrote a sentence like “This is an easy read checker.”, the programme would count the fullstop at the end of ‘checker’ as part of the word itself.
+
+While a 12 character word is usually fine, a 12 character word followed by a comma would be flagged as 13 characters. This led to false positives where the programme would warn the user about a word that was under the character limit, just because of trailing punctuation.
+
+Initially, my code split the sentence by spaces and counted every character in the resulting strings. It didn’t account for the fact that symbols are not part of the word’s actual length in the easy read character limit.
+``` java
+String[] splitWords = input.split(“\\s+”);
+for(String word : splitWords)
+{
+	int length = word.length();
+	if(length > characterLimit)
+    {
+        // ...
     }
+}
+```
 
-This fix stabilised the feature and improved performance. In hindsight, separating the detection logic from the output logic earlier would have reduced complexity. However, this issue helped reinforce the importance of keeping methods focused on a single responsibility.
+I realised that I needed to clean the sentence before measuring it. This introduced me to Regular Expressions (Regex). I researched how to use the .replaceAll() method to strip away non-alphanumeric characters from the start and end of a word.
 
----
+I specifically looked for a way to target leading and trailing punctuation. This ensured that if a word was hyphenated (like “in-depth”), the hyphen in the middle would remain, but any leading or trailing punctuation would be removed.
 
-## Issue 3: Testing Methods That Only Printed Output
+I implemented a cleaning step inside the loop. Using Regex patterns, I stripped away anything that wasn’t a letter or a number from the boundaries of each word before the length was calculated.
+``` java
+for(String word : splitWords)
+{
+    String cleaned = word.replaceAll("^[^\\p{L}\\p{N}]+", ""); 
+    cleaned = cleaned.replaceAll("[^\\p{L}\\p{N}]+$", "");
+	int length = cleaned.length();
+	if(length > characterLimit)
+	{
+		anyTooLong = true;
+        System.out.println(“\nThe word “ + cleaned.toUpperCase() + “ is too long (“
+        + length + “ characters).”);
+	}
+}
+```
 
-Another challenge was testing methods that relied solely on console output. JUnit tests are designed to verify return values, not printed text, which made some early tests ineffective.
-
-Initially, some methods only printed results:
-
-    public static void countWords(String sentence) {
-        System.out.println(sentence.split("\\s+").length);
-    }
-
-This made it difficult to write meaningful unit tests. To resolve this, I refactored key methods to return values instead of only printing output.
-
-Improved version:
-
-    public static int countWords(String sentence) {
-        return sentence.split("\\s+").length;
-    }
-
-This change made the code easier to test and improved overall design. While not all methods were refactored due to time constraints, this issue highlighted the importance of considering testability during initial development rather than as an afterthought.
-
----
-
-## Reflection
-
-These issues encouraged a more thoughtful and structured approach to programming. Debugging and testing helped me better understand how Java handles input, data structures, and method design. The solutions implemented improved the reliability and maintainability of the program and supported my understanding of software verification and problem-solving techniques.
-
-# Conclusion
-
-The development of the Easy Read Checker has strengthened my understanding of fundamental programming concepts in Java, including user input, object-oriented design, and software testing. By building a complete console-based application, I was able to apply theoretical knowledge from lectures and labs to a practical problem focused on accessibility and clarity.
-
-The iterative nature of the project encouraged problem-solving and debugging, particularly when dealing with input validation, complex logic, and test design. These challenges highlighted the importance of writing clear, modular code and considering testability early in development.
-
-Overall, the project demonstrates my ability to design and implement a structured Java program that meets the assignment requirements. The experience gained from this digital artefact provides a strong foundation for future modules involving more advanced programming techniques and software development practices.
+By adding this cleaning step, I ensured the accuracy of the feedback. This makes the programme much more reliable, as it is now able to check word lengths correctly for the user’s benefit.
 
